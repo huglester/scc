@@ -27,7 +27,7 @@ class Create_accounts_table
 			'FirstName',
 			'LastName',
 			'admin',
-			'admin',
+			'admin123',
 			'admin@admin.com',
 			100
 		);
