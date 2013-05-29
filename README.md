@@ -7,3 +7,21 @@ git submodule foreach git checkout 1.7/develop
 php composer.phar selfupdate
 
 php composer.phar install
+
+rm -rf fuel/app
+
+mkdir fuel/app
+
+cd fuel/app
+
+git clone git://github.com/krek-dev/scc.git .
+
+nano config/production/db.php
+
+nano config/production/server.php
+
+cd ..
+
+php oil refine install
+
+php oil r migrate
