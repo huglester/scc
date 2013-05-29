@@ -22,8 +22,8 @@
 					<tr>
 						<td><?php echo $value->title; ?></td>
 						<td><?php echo $value->password; ?></td>
-						<td><a href="<?php echo 'http://'.$value['title'].'.'.$server_name; ?>"><?php echo $value['title']; ?></a></td>
-						<td><a href="<?php echo 'http://'.$value['title'].'.'.$server_name.'/phpmyadmin?pma_username='.$value->title.'&pma_password='.$value->password; ?>">Database</a></td>
+						<td><a target="\blank" href="<?php echo 'http://'.$value['title'].'.'.$server_name; ?>"><?php echo $value['title']; ?></a></td>
+						<td><a target="\blank" href="<?php echo 'http://'.$value['title'].'.'.$server_name.'/phpmyadmin?pma_username='.$value->title.'&pma_password='.$value->password; ?>">Database</a></td>
 						<td><?php echo $value['first_name'].' '.$value['last_name']; ?></td>
 						<td><?php echo Date::forge($value['created_at'])->format('%Y-%m-%d'); ?></td>
 						<td>
