@@ -1,6 +1,10 @@
 <div class="row">
 	<div class="span12">
-		<?php echo Html::anchor('hosts/create', '<i class="icon-book"></i> Create', array('class' => 'btn btn-small btn-success pull-right')); ?>
+		<?php echo Form::open(array('class' => 'form-search pull-right')); ?>
+			<input class="input-medium search-query" type="text" name="search" value="<?php echo $current_search; ?>" id="inputTitle" placeholder="Title">
+			<button class="btn btn-small btn-success" type="submit"><i class="icon-search"></i> Search</button>
+		</form>
+		<?php echo Html::anchor('hosts/create', '<i class="icon-book"></i> Create', array('class' => 'btn btn-small btn-success')); ?>
 	</div>
 
 	<div class="span12 rawr">
