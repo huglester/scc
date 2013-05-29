@@ -25,3 +25,5 @@ cd ..
 php oil refine install
 
 php oil r migrate
+
+admin@admin.com/admin123
