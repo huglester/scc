@@ -37,6 +37,7 @@
 		<?php endforeach ?>
 				</tbody>
 			</table>
+			<?php echo $pagination->render(); ?>
 		<?php else: ?>
 			<div class="alert alert-error">
 				Sorry we cannot find any records
