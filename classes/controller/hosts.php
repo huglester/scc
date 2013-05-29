@@ -34,6 +34,9 @@ class Controller_Hosts extends Controller_Base
 											->execute()->count(),
 			));
 
+			// Preparing server configuration
+			Config::load('server', 'server');
+
 			// Getting hosts
 			try
 			{
@@ -64,6 +67,7 @@ class Controller_Hosts extends Controller_Base
 				'hosts' => $hosts,
 				'pagination' => $pagination,
 				'current_search' => $current_search,
+				'server_name' => Config::get('server.name'),
 			));
 		}
 		catch (Exception $e)

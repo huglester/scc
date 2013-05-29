@@ -80,8 +80,8 @@ class MyEvents
 				// Apache
 				$ssh->exec('echo "<VirtualHost *:80>
         ServerAdmin krek@nnteam.eu
-        ServerName '.$args['title'].'.pepperit.lt
-        ServerAlias '.$args['title'].'.pepperit.lt
+        ServerName '.$args['title'].'.'.Config::get('server.name').'
+        ServerAlias '.$args['title'].'.'.Config::get('server.name').'
         DocumentRoot /var/www/vhosts/'.$args['title'].'/wwwroot/public
         <Directory /var/www/vhosts/'.$args['title'].'/wwwroot/public>
                 Options FollowSymLinks
