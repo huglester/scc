@@ -10,10 +10,6 @@
 		<div class="controls">
 			<input class="span12" type="text" name="title" value="<?php echo $validation->validated('title'); ?>" id="inputTitle" placeholder="title">
 		</div>
-		<div class="controls">
-			<input type="checkbox" value="1" name="database" checked>
-			Create database
-		</div>
 	</div>
 	<button class="btn btn-large btn-primary" type="submit">Crate</button>
 </form>

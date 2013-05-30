@@ -7,46 +7,30 @@ class MyEvents
 		// Registering all events
 		Event::register('accounts_create', function($args)
 		{
-			try
-			{
-				Cache::delete_all("accounts");
-			}
-			catch (Exception $e)
-			{
-			}
 		});
 
 		Event::register('accounts_edit', function($args)
 		{
-			try
-			{
-				Cache::delete_all("accounts");
-			}
-			catch (Exception $e)
-			{
-			}
+			// Delete cache
+			Event::trigger('delete_cache', array(
+				'accounts'
+			));
 		});
 
 		Event::register('accounts_delete', function($args)
 		{
-			try
-			{
-				Cache::delete_all("accounts");
-			}
-			catch (Exception $e)
-			{
-			}
+			// Delete cache
+			Event::trigger('delete_cache', array(
+				'accounts'
+			));
 		});
 
 		Event::register('accounts_logout', function($args)
 		{
-			try
-			{
-				Cache::delete_all("accounts");
-			}
-			catch (Exception $e)
-			{
-			}
+			// Delete cache
+			Event::trigger('delete_cache', array(
+				'accounts'
+			));
 		});
 
 		Event::register('hosts_create', function($args)
@@ -71,11 +55,6 @@ class MyEvents
 				$ssh->exec('mkdir -p /var/www/vhosts/'.$args['title'].'/wwwroot/public');
 				$ssh->exec('chown -R '.$args['title'].':'.$args['title'].' /var/www/vhosts/'.$args['title'].'/wwwroot');
 				$ssh->exec('echo '.$args['title'].':'.$args['password'].' | chpasswd');
-
-				// Mysql
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "CREATE DATABASE '.$args['title'].'";');
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "GRANT ALL ON '.$args['title'].'.* to '.$args['title'].'@localhost IDENTIFIED BY \''.$args['password'].'\'";');
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "flush privileges";');
 
 				// Apache
 				$ssh->exec('echo "<VirtualHost *:80>
@@ -111,7 +90,10 @@ class MyEvents
 				// Disconnect from server
 				$ssh->disconnect();
 
-				Cache::delete_all("hosts");
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'hosts', 'databases'
+				));
 			}
 			catch (Exception $e)
 			{
@@ -120,13 +102,10 @@ class MyEvents
 
 		Event::register('hosts_edit', function($args)
 		{
-			try
-			{
-				Cache::delete_all("hosts");
-			}
-			catch (Exception $e)
-			{
-			}
+			// Delete cache
+			Event::trigger('delete_cache', array(
+				'hosts', 'databases'
+			));
 		});
 
 		Event::register('hosts_delete', function($args)
@@ -149,11 +128,6 @@ class MyEvents
 				$ssh->exec('userdel '.$args['title']);
 				$ssh->exec('rm -rf /var/www/vhosts/'.$args['title']);
 
-				// Mysql
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "DROP DATABASE '.$args['title'].'";');
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "DROP USER '.$args['title'].'@localhost";');
-				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "flush privileges";');
-
 				// Apache
 				$ssh->exec('rm -rf /etc/apache2/sites-enabled/vhost-'.$args['title']);
 				$ssh->exec('/etc/init.d/apache2 reload');
@@ -161,7 +135,92 @@ class MyEvents
 				// Disconnect from server
 				$ssh->disconnect();
 
-				Cache::delete_all("hosts");
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'hosts', 'databases'
+				));
+			}
+			catch (Exception $e)
+			{
+			}
+		});
+
+		Event::register('databases_create', function($args)
+		{
+			try
+			{
+				// Loading server configuration
+				Config::load('server', 'server');
+
+				// connect to server
+				$ssh = new \PHPSecLib\Net_SSH2(Config::get('server.ip'), Config::get('server.port'));
+
+				// login to server
+				if ( ! $ssh->login(Config::get('server.user'), Config::get('server.password')))
+				{
+					throw new \Exception('ssh login failed');
+				}
+
+				// Create mysql user and table
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "CREATE DATABASE '.$args['title'].'";');
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "GRANT ALL ON '.$args['title'].'.* to '.$args['title'].'@localhost IDENTIFIED BY \''.$args['password'].'\'";');
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "flush privileges";');
+
+				// Disconnect from server
+				$ssh->disconnect();
+
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'hosts', 'databases'
+				));
+			}
+			catch (Exception $e)
+			{
+			}
+		});
+
+		Event::register('databases_delete', function($args)
+		{
+			try
+			{
+				// Loading server configuration
+				Config::load('server', 'server');
+
+				// connect to server
+				$ssh = new \PHPSecLib\Net_SSH2(Config::get('server.ip'), Config::get('server.port'));
+
+				// login to server
+				if ( ! $ssh->login(Config::get('server.user'), Config::get('server.password')))
+				{
+					throw new \Exception('ssh login failed');
+				}
+
+				// Delete mysql user and table
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "DROP DATABASE '.$args['title'].'";');
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "DROP USER '.$args['title'].'@localhost";');
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' -e "flush privileges";');
+
+				// Disconnect from server
+				$ssh->disconnect();
+
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'hosts', 'databases'
+				));
+			}
+			catch (Exception $e)
+			{
+			}
+		});
+
+		Event::register('delete_cache', function($args)
+		{
+			try
+			{
+				foreach ($args as $value)
+				{
+					Cache::delete_all($value);
+				}
 			}
 			catch (Exception $e)
 			{

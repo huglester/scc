@@ -1,6 +1,6 @@
 <?php
 
-class Controller_Hosts extends Controller_Base
+class Controller_Databases extends Controller_Base
 {
 	public function action_index()
 	{
@@ -9,27 +9,27 @@ class Controller_Hosts extends Controller_Base
 			// Preparing limit
 			$default_limit	= 20;
 			$valid_limits	= array(20, 40, 60, 100);
-			$unvalid_limit	= Input::get('limit', Cookie::get('hosts_limit', $default_limit));
+			$unvalid_limit	= Input::get('limit', Cookie::get('databases_limit', $default_limit));
 			$valid_limit 	= (int)in_array($unvalid_limit, $valid_limits) ? $unvalid_limit : $default_limit;
-			Cookie::set('hosts_limit', $valid_limit);
+			Cookie::set('databases_limit', $valid_limit);
 
 			// Preparing current page
 			$default_page 	= 1;
-			$current_page	= (int)Input::get('page', Cookie::get('hosts_page', $default_page));
-			Cookie::set('hosts_page', $current_page);
+			$current_page	= (int)Input::get('page', Cookie::get('databases_page', $default_page));
+			Cookie::set('databases_page', $current_page);
 
 			// Preparing search
 			$default_search = '';
-			$current_search	= Input::post('search', Cookie::get('hosts_search', $default_search));
-			Cookie::set('hosts_search', $current_search);
+			$current_search	= Input::post('search', Cookie::get('databases_search', $default_search));
+			Cookie::set('databases_search', $current_search);
 
 			// Preparing pagination
-			$pagination = Pagination::forge('hosts', array(
+			$pagination = Pagination::forge('databases', array(
 				'pagination_url'	=> Uri::current(),
 				'per_page'			=> $valid_limit,
 				'current_page'		=> $current_page,
 				'uri_segment'		=> 'page',
-				'total_items'		=> DB::select('id')->from('hosts')
+				'total_items'		=> DB::select('id')->from('databases')
 											->where('title', 'like',$current_search.'%')
 											->execute()->count(),
 			));
@@ -37,36 +37,34 @@ class Controller_Hosts extends Controller_Base
 			// Preparing server configuration
 			Config::load('server', 'server');
 
-			// Getting hosts
+			// Getting databases
 			try
 			{
-				$hosts = Cache::get('hosts.'.md5($valid_limit.'_'.$current_page.'_'.$current_search));
+				$databases = Cache::get('databases.'.md5($valid_limit.'_'.$current_page.'_'.$current_search));
 			}
 			catch (\CacheNotFoundException $e)
 			{
-				// Getting hosts
-				$hosts = Model_Host::find(function($query) use($pagination, $current_search)
+				// Getting databases
+				$databases = Model_Database::find(function($query) use($pagination, $current_search)
 				{
-					$query->select('hosts.id','hosts.title', 'hosts.password', 'hosts.updated_at', 'hosts.updated_at',
-									'hosts.created_at', 'accounts.first_name', 'accounts.last_name', array('databases.password', 'db_password'))
-							->where('hosts.title', 'like', $current_search.'%')
+					$query->select('databases.id','databases.title', 'databases.password', 'databases.updated_at', 'databases.updated_at',
+									'databases.created_at', 'accounts.first_name', 'accounts.last_name')
+							->where('title', 'like', $current_search.'%')
 							->join('accounts')
-							->on('hosts.account_id', '=', 'accounts.id')
-							->join('databases', 'LEFT')
-							->on('hosts.title', '=', 'databases.title')
+							->on('databases.account_id', '=', 'accounts.id')
 							->limit($pagination->per_page)
 							->offset($pagination->offset);
 					return $query;
 				});
 
-				// Save hosts to cache
-				Cache::set('hosts.'.md5($valid_limit.'_'.$current_page.'_'.$current_search), $hosts, 3600 * 3);
+				// Save databases to cache
+				Cache::set('databases.'.md5($valid_limit.'_'.$current_page.'_'.$current_search), $databases, 3600 * 3);
 			}
 
 			// Setting data to template
-			$this->template->title = 'Hosts';
-			$this->template->content = View::forge('hosts/index', array(
-				'hosts' => $hosts,
+			$this->template->title = 'Databases';
+			$this->template->content = View::forge('databases/index', array(
+				'databases' => $databases,
 				'pagination' => $pagination,
 				'current_search' => $current_search,
 				'server_name' => Config::get('server.name'),
@@ -94,50 +92,31 @@ class Controller_Hosts extends Controller_Base
 				if ( ! Security::check_token())
 				{
 					//TODO Log ip and error count +1 + error type
-					return Response::redirect('hosts/create');
+					return Response::redirect('databases/create');
 				}
 
 				// Validate form
 				if ($validation->run())
 				{
-					// Create host
-					$host = Model_Host::forge();
-					$host->title 		= strtolower($validation->validated('title'));
-					$host->account_id	= $this->current_user_id;
-					$host->active 		= 1;
-					$host->password 	= Str::random('alnum', 8);
+					// Create database
+					$database = Model_Database::forge();
+					$database->title 		= strtolower($validation->validated('title'));
+					$database->account_id	= $this->current_user_id;
+					$database->active 		= 1;
+					$database->password 	= Str::random('alnum', 8);
 
-					if ($host->save())
+					if ($database->save())
 					{
-						// Trigger create host event
-						Event::trigger('hosts_create', array(
-							'id' => $host->id,
-							'title' => $host->title,
-							'password' => $host->password,
+						// Trigger create database event
+						Event::trigger('databases_create', array(
+							'id' => $database->id,
+							'title' => $database->title,
+							'password' => $database->password,
 						));
 
-						// Create database submitted
-						if (Input::post('database'))
-						{
-							// Create database
-							$database = Model_Database::forge();
-							$database->title 		= strtolower($validation->validated('title'));
-							$database->account_id	= $this->current_user_id;
-							$database->active 		= 1;
-							$database->password 	= Str::random('alnum', 8);
-							$database->save();
-
-							// Trigger create database event
-							Event::trigger('databases_create', array(
-								'id' => $database->id,
-								'title' => $database->title,
-								'password' => $database->password,
-							));
-						}
-
 						// Setting messages and redirecting
-						Session::set_flash('success', 'Hosts was successfully created!');
-						return Response::redirect('hosts/index');
+						Session::set_flash('success', 'Database was successfully created!');
+						return Response::redirect('databases/index');
 					}
 					else
 					{
@@ -150,7 +129,7 @@ class Controller_Hosts extends Controller_Base
 
 			// Setting data to template
 			$this->template->title = 'Crate';
-			$this->template->content = View::forge('hosts/create', array(
+			$this->template->content = View::forge('databases/create', array(
 				'validation' => $validation,
 			));
 		}
@@ -230,23 +209,23 @@ class Controller_Hosts extends Controller_Base
 	{
 		try
 		{
-			// Getting host
-			$host = Model_Host::find_by_pk((int)$id);
+			// Getting database
+			$database = Model_Database::find_by_pk((int)$id);
 
-			if ($host)
+			if ($database)
 			{
-				// Deleting host
-				$host->delete();
+				// Deleting database
+				$database->delete();
 
-				// Trigger delete host events
-				Event::trigger('hosts_delete', array(
-					'id' => $host->id,
-					'title' => $host->title,
-					'password' => $host->password,
+				// Trigger delete database event
+				Event::trigger('databases_delete', array(
+					'id' => $database->id,
+					'title' => $database->title,
+					'password' => $database->password,
 				));
 
 				// Setting success message
-				Session::set_flash('success', 'Host '.$host->title.' was removed !');
+				Session::set_flash('success', 'Database '.$database->title.' was removed !');
 			}
 			else
 			{
@@ -255,7 +234,7 @@ class Controller_Hosts extends Controller_Base
 			}
 
 			// Redirecting to index
-			return Response::redirect('hosts');
+			return Response::redirect('databases');
 		}
 		catch (Exception $e)
 		{

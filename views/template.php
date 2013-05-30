@@ -28,6 +28,7 @@
 						<li class="<?php echo (Uri::segment(1) == 'dashboard' or Uri::segment(1) == '') ? 'active' : ''; ?>"><a href="<?php echo Uri::create('dashboard'); ?>">Dashboard</a></li>
 						<li class="<?php echo (Uri::segment(1) == 'accounts') ? 'active' : ''; ?>"><a href="<?php echo Uri::create('accounts'); ?>">Accounts</a></li>
 						<li class="<?php echo (Uri::segment(1) == 'hosts') ? 'active' : ''; ?>"><a href="<?php echo Uri::create('hosts'); ?>">Hosts</a></li>
+						<li class="<?php echo (Uri::segment(1) == 'databases') ? 'active' : ''; ?>"><a href="<?php echo Uri::create('databases'); ?>">Databases</a></li>
 					</ul>
 				</div>
 			</div>
