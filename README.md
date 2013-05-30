@@ -26,4 +26,6 @@ php oil refine install
 
 php oil r migrate
 
+php oil refine hosts:import_old_hosts old_password
+
 admin@admin.com/admin123
