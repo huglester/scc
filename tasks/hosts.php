@@ -57,7 +57,7 @@ class Hosts
 
 			// Delete hosts cache
 			\Event::trigger('delete_cache', array(
-				'hosts'
+				'hosts', 'databases'
 			));
 		}
 
