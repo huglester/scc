@@ -28,4 +28,6 @@ php oil r migrate
 
 php oil refine hosts:import_old_hosts old_password
 
+php oil refine databases:import_old_databases old_password
+
 admin@admin.com/admin123
