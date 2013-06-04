@@ -34,8 +34,8 @@
 						<td>-</td>
 					<?php endif; ?>
 						<td><?php echo ($value->db_password) ? $value->db_password : '-'; ?></td>
-						<td><?php echo $value['first_name'].' '.$value['last_name']; ?></td>
-						<td><?php echo Date::forge($value['created_at'])->format('%Y-%m-%d'); ?></td>
+						<td><?php echo $value['first_name'].' '.Str::truncate($value['last_name'], 1, '.'); ?></td>
+						<td><?php echo Date::forge($value['created_at'])->format('%Y-%m-%d %H:%M:%S'); ?></td>
 						<td>
 							<?php echo Html::anchor('hosts/delete/'.$value['id'], '<i class="icon-trash"></i> Delete', array('class' => 'btn btn-small btn-danger')); ?>
 						</td>

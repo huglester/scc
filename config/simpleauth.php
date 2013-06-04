@@ -95,13 +95,13 @@ return array(
 		'developers' => array(
 			'Controller_Accounts'	=> array('login', 'logout'),
 			'Controller_Hosts'		=> array('create', 'index', 'delete'),
-			'Controller_Databases'	=> array('create', 'index', 'delete'),
+			'Controller_Databases'	=> array('create', 'index', 'delete', 'backup', 'restore'),
 			'Controller_Dashboard'	=> array('index'),
 		),
 		'administrators' => array(
 			'Controller_Accounts'	=> array('login', 'logout', 'create', 'index', 'delete', 'edit'),
 			'Controller_Hosts'		=> array('create', 'index', 'delete'),
-			'Controller_Databases'	=> array('create', 'index', 'delete'),
+			'Controller_Databases'	=> array('create', 'index', 'delete', 'backup', 'restore'),
 			'Controller_Dashboard'	=> array('index'),
 		),
 	),

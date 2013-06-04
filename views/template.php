@@ -8,6 +8,7 @@
 	<style>
 		body { margin: 60px; }
 		.rawr {	margin-top: 10px; }
+		.table th, .table td { padding: 4px; }
 	</style>
 </head>
 <body>

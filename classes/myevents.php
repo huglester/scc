@@ -213,6 +213,73 @@ class MyEvents
 			}
 		});
 
+		Event::register('databases_backup', function($args)
+		{
+			try
+			{
+				// Loading server configuration
+				Config::load('server', 'server');
+
+				// connect to server
+				$ssh = new \PHPSecLib\Net_SSH2(Config::get('server.ip'), Config::get('server.port'));
+
+				// login to server
+				if ( ! $ssh->login(Config::get('server.user'), Config::get('server.password')))
+				{
+					throw new \Exception('ssh login failed');
+				}
+
+				// Backup mysql table
+				$ssh->exec('mysqldump -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' --default-character-set=utf8 '.$args['title'].' > /var/www/vhosts/scc/wwwroot/fuel/app/cache/'.$args['title'].'.sql');
+				$ssh->exec('chown scc:scc /var/www/vhosts/scc/wwwroot/fuel/app/cache/'.$args['title'].'.sql');
+
+				// Disconnect from server
+				$ssh->disconnect();
+
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'databases'
+				));
+
+			}
+			catch (Exception $e)
+			{
+			}
+		});
+
+		Event::register('databases_restore', function($args)
+		{
+			try
+			{
+				// Loading server configuration
+				Config::load('server', 'server');
+
+				// connect to server
+				$ssh = new \PHPSecLib\Net_SSH2(Config::get('server.ip'), Config::get('server.port'));
+
+				// login to server
+				if ( ! $ssh->login(Config::get('server.user'), Config::get('server.password')))
+				{
+					throw new \Exception('ssh login failed');
+				}
+
+				// Backup mysql table
+				$ssh->exec('mysql -u'.Config::get('server.db.user').' -p'.Config::get('server.db.password').' --default-character-set=utf8 '.$args['title'].' < /var/www/vhosts/scc/wwwroot/fuel/app/cache/'.$args['title'].'.sql');
+
+				// Disconnect from server
+				$ssh->disconnect();
+
+				// Delete cache
+				Event::trigger('delete_cache', array(
+					'databases'
+				));
+
+			}
+			catch (Exception $e)
+			{
+			}
+		});
+
 		Event::register('delete_cache', function($args)
 		{
 			try

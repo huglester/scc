@@ -48,7 +48,7 @@ class Controller_Databases extends Controller_Base
 				$databases = Model_Database::find(function($query) use($pagination, $current_search)
 				{
 					$query->select('databases.id','databases.title', 'databases.password', 'databases.updated_at', 'databases.updated_at',
-									'databases.created_at', 'accounts.first_name', 'accounts.last_name')
+									'databases.created_at', 'accounts.first_name', 'accounts.last_name', 'databases.backuped_at', 'databases.restored_at')
 							->where('title', 'like', $current_search.'%')
 							->join('accounts')
 							->on('databases.account_id', '=', 'accounts.id')
@@ -226,6 +226,82 @@ class Controller_Databases extends Controller_Base
 
 				// Setting success message
 				Session::set_flash('success', 'Database '.$database->title.' was removed !');
+			}
+			else
+			{
+				Session::set_flash('error', 'Unable to find host with id : '.$id);
+				Log::error('Unable to find host with id : '.$id);
+			}
+
+			// Redirecting to index
+			return Response::redirect('databases');
+		}
+		catch (Exception $e)
+		{
+			Log::error('Error - '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine());
+			return Response::redirect('/');
+		}
+	}
+
+	public function action_backup($id = null)
+	{
+		try
+		{
+			// Getting database
+			$database = Model_Database::find_by_pk((int)$id);
+
+			if ($database)
+			{
+				// Trigger database backup event
+				Event::trigger('databases_backup', array(
+					'id' => $database->id,
+					'title' => $database->title,
+					'password' => $database->password,
+				));
+
+				$database->backuped_at = time();
+				$database->save();
+
+				// Setting success message
+				Session::set_flash('success', 'Database '.$database->title.' was backup-ed !');
+			}
+			else
+			{
+				Session::set_flash('error', 'Unable to find host with id : '.$id);
+				Log::error('Unable to find host with id : '.$id);
+			}
+
+			// Redirecting to index
+			return Response::redirect('databases');
+		}
+		catch (Exception $e)
+		{
+			Log::error('Error - '.$e->getMessage().' in '.$e->getFile().' on line '.$e->getLine());
+			return Response::redirect('/');
+		}
+	}
+
+	public function action_restore($id = null)
+	{
+		try
+		{
+			// Getting database
+			$database = Model_Database::find_by_pk((int)$id);
+
+			if ($database)
+			{
+				// Trigger database restore event
+				Event::trigger('databases_restore', array(
+					'id' => $database->id,
+					'title' => $database->title,
+					'password' => $database->password,
+				));
+
+				$database->restored_at = time();
+				$database->save();
+
+				// Setting success message
+				Session::set_flash('success', 'Database '.$database->title.' was restored !');
 			}
 			else
 			{

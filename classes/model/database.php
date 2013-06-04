@@ -18,6 +18,8 @@ class Model_Database extends \Model_Crud
 		'password',
 		'created_at',
 		'updated_at',
+		'backuped_at',
+		'restored_at',
 	);
 
 	protected static $_defaults = array();
