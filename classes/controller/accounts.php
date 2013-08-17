@@ -28,7 +28,7 @@ class Controller_Accounts extends Controller_Base
 					if (\Auth::login($validation->validated('email'), $validation->validated('password')))
 					{
 						// Getting user group
-						list($driver, $group_id) = \Auth::get_groups()[0];
+						list($driver, $group_id) = current(\Auth::get_groups());
 
 						// Checking group
 						if ($group_id == -1)
